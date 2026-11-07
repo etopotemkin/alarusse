@@ -11,6 +11,7 @@ A fork of Felucca for the M-VAVE FM-1 aimed at rave / hard-techno live sets. Ups
 - **Power-on band**: ANALOG BAYAN, PHYS BALALAIKA, VOICE ZHALEIKA, DRUM FOLK KIT (`FELUCCA_FOLK_DEF=0`: upstream's sounds; the host tests use those).
 - **FX layer: BUILD UP and DROP** on F5 / G5 (free upstream). BUILD UP: hold it for a two-bar riser (opening noise, the mix's high-pass rising), let go for the drop. DROP: every track muted while held, the reverb and delay ring on; let go and the band is back on the next beat.
 - **Folk UI themes** (MENU > COLOR): HOHLOMA (black lacquer, gold, cinnabar), GZHEL (porcelain and cobalt), PALEKH (black lacquer, ultramarine, gold), ZHOSTOV (Zhostovo: black, roses, leaves), GORODEC (Gorodets: ochre wood, madder red, cobalt), DYMKA (Dymkovo: white clay, crimson, green). The FOLK kit's lanes are named on the grid (BD BB TR LZ BC TM KB ZV).
+- **Theme screen at the first power-on** (and once after updating to this firmware): any knob steps through the 16 themes with a live preview, a button keeps it.
 - `tests/folk_demo.c`: an 8-bar folk-rave demo through the real engines.
 - Felucca-Engines is vendored in `firmware/engines/` (MIT) instead of a submodule, so the fork's presets build in CI.
 

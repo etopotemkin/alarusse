@@ -4992,6 +4992,9 @@ static int test_large_face(void)
     for (i = 0; i < NB + NE + 2u; i++)                              /* ui_input.c setup_show: the control names */
         for (s = i < NB ? B_NAME[i] : i < NB + NE ? E_NAME[i - NB] : FIXED[i - NB - NE]; *s; s++)
             missing += glyph_at(&AF_L, (uint8_t)*s) < 0;
+    for (i = 0; i < NPALETTES; i++)                                 /* rave fork: ui_input.c theme_pick_draw, the names */
+        for (s = UI_PALETTES[i].name; *s; s++)
+            missing += glyph_at(&AF_L, (uint8_t)*s) < 0;
     return check("the L face holds every glyph of the strings drawn in it", !missing);
 }
 

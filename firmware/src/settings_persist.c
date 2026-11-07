@@ -68,7 +68,8 @@ static int settings_import(persist_t *p, int n)
         }
     }
     p->magic = PERSIST_MAGIC;
-    p->palette = palette_to_stored(palette_from_stored(p->palette));
+    theme_chosen = (uint8_t)((p->palette >> 8) & 1u);   /* (rave fork: the theme screen's flag, panel.c) */
+    p->palette = palette_to_stored(palette_from_stored(p->palette & 0xFFu));
     settings.magic = SETTINGS_MAGIC;
     settings.palette = palette_from_stored(p->palette);
     settings.lowcut = p->lowcut;
@@ -103,7 +104,7 @@ static int settings_import(persist_t *p, int n)
 static void settings_export(persist_t *p)
 {
     p->magic = PERSIST_MAGIC;
-    p->palette = palette_to_stored(settings.palette);
+    p->palette = palette_to_stored(settings.palette) | (uint32_t)theme_chosen << 8;
     p->lowcut = settings.lowcut;
     p->zoom = settings.zoom = leds_to_stored(settings.zoom, settings_leds);
     p->panel = panel;

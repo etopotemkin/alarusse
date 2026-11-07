@@ -114,6 +114,9 @@ static uint32_t leds_step(uint32_t m, int32_t s)
 }
 
 static void palette_apply(void);               /* (ui.c: the palette in use, CUSTOM or a built-in one) */
+/* rave fork: the colour theme was picked on the theme screen (ui_input.c theme_pick, at the first power-on and after
+ * an update to a firmware that has it): bit 8 of the stored palette (settings_persist.c; 0 in every older setting) */
+static uint8_t theme_chosen;
 static void settings_init(void)
 {
     if (settings.magic == SETTINGS_MAGIC_OLD && settings.palette < 20u) {

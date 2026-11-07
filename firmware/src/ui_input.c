@@ -1949,3 +1949,72 @@ timeout:
     ui.force = 1;
     ui_message("SETUP CANCELLED");
 }
+
+/* rave fork: the colour theme screen, once (main.c: while theme_chosen is 0). Any knob steps through the palettes, the
+ * whole screen in each as it would look (a track list of the folk band); a button keeps it (as do a key, or a minute
+ * with nothing touched); MENU > COLOR changes it later */
+static const char *const TP_ROWS[4] = {"BAYAN", "BALALAIKA", "ZHALEIKA", "FOLK KIT"};
+static void theme_pick_draw(uint32_t i)
+{
+    uint32_t k, s;
+    char n[12];
+    i %= NPALETTES;
+    palette_set(i);
+    lcd_fill(0, 0, 240, 240, T_BG);
+    draw_text_box(0, 10, 240, &AF_M, "COLOR THEME", T_MID, 1);
+    draw_text_box(0, 38, 240, &AF_L, UI_PALETTES[i].name, T_THEME, 1);
+    k = 0;
+    if (i + 1u >= 10u)
+        n[k++] = (char)('0' + (i + 1u) / 10u);
+    n[k++] = (char)('0' + (i + 1u) % 10u);
+    str_cpy(n + k, " / ", sizeof n - k);
+    k += 3;
+    if (NPALETTES >= 10u)
+        n[k++] = (char)('0' + NPALETTES / 10u);
+    n[k++] = (char)('0' + NPALETTES % 10u);
+    n[k] = 0;
+    draw_text_box(0, 74, 240, &AF_S, n, T_DIM, 1);
+    for (k = 0; k < 4u; k++) {                           /* the folk band, track 2 selected */
+        int sel = k == 1u;
+        char d[2] = {(char)('1' + k), 0};
+        cv_begin(216, 26, T_BG);
+        cv_rrect(0, 0, 216, 26, 6, sel ? T_THEME : T_SURF, T_BG);
+        cv_rrect(5, 5, 16, 16, 4, sel ? T_INK : T_RAISE, sel ? T_THEME : T_SURF);
+        cv_text_on(9, 6, &AF_S, d, sel ? T_THEME : T_TEXT, sel ? T_INK : T_RAISE);
+        cv_text_on(28, 6, &AF_S, TP_ROWS[k], sel ? T_INK : T_TEXT, sel ? T_THEME : T_SURF);
+        for (s = 0; s < 8u; s++)                         /* steps: hits in the theme, the playhead's in the accent */
+            cv_rect(136 + (int32_t)s * 9, 10, 6, 6, s == 3u ? T_ACCENT : (s + k) % 3u ? (sel ? T_INK : T_THEME) :
+                    (sel ? T_SEL : T_DIM));
+        cv_blit(12, 98 + k * 28);
+    }
+    draw_text_box(0, 214, 240, &AF_S, "KNOB: THEME   BUTTON: KEEP", T_MID, 1);
+}
+static void theme_pick(void)
+{
+    uint32_t i = settings.palette % NPALETTES, t0 = fm1_ms, k;
+    theme_pick_draw(i);
+    while (fm1_in.buttons && fm1_ms - t0 < 5000u)        /* (OCT- / OCT+ of the calibration let go) */
+        fm1_wdt_feed();
+    fm1_input_edges(0);
+    for (k = 0; k < 7u; k++)
+        fm1_enc_take(k);
+    t0 = fm1_ms;
+    for (;;) {
+        int32_t d = 0;
+        fm1_wdt_feed();
+        for (k = 0; k < NE; k++)
+            d += fm1_enc_take(panel.enc[k]) * panel.dir[k];
+        if (d) {
+            i = (i + (d > 0 ? 1u : NPALETTES - 1u)) % NPALETTES;
+            theme_pick_draw(i);
+            t0 = fm1_ms;
+        }
+        if (fm1_input_edges(0) || fm1_in.notes || fm1_ms - t0 > 60000u)
+            break;
+    }
+    settings.palette = i;
+    palette_apply();
+    theme_chosen = 1;
+    lcd_fill(0, 0, 240, 240, T_BG);
+    ui.force = 1;
+}
