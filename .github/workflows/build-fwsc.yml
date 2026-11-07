@@ -52,3 +52,31 @@ jobs:
       - name: Host tests
         continue-on-error: true
         run: sh tests/run_tests.sh
+
+  # the web installer (web/make_site.py) with this build's package, on GitHub Pages (Settings > Pages > Source:
+  # GitHub Actions): open it in Chrome or Edge, the FM-1 on USB, Install
+  pages:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: fm1-firmware-${{ github.sha }}
+          path: build
+      - name: Make the installer site
+        run: |
+          python3 web/make_site.py build/felucca.fwsc "rave-${GITHUB_SHA::7}" site
+          ls -R site | head -40
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
