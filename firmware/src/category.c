@@ -19,18 +19,18 @@ static uint32_t cat_of_engine(uint32_t e) { return e == 10u || e == 13u ? CAT_DR
  * only; SAMPLE's retired PERC, past SMP_NPRESETS): its engine's (cat_of_engine). tests/ui_test.c checks every string
  * against its engine's preset count. A preset's category is a hint for browsing: nothing else reads it */
 static const char *const PRESET_CAT[16] = {
-    "LPBPBKLBULLPKK",            /* 0 ANALOG: SAW LEAD, SOFT PAD, SQR BASS, PWM STR, ACID, SINE KEY, RAVE, SUB BASS,
-                                  * PLUCK, BRASS, WIND, STRINGS; rave fork: BAYAN, GARMON */
+    "LPBPBKLBULLPKKLLLK",        /* 0 ANALOG: SAW LEAD, SOFT PAD, SQR BASS, PWM STR, ACID, SINE KEY, RAVE, SUB BASS,
+                                  * PLUCK, BRASS, WIND, STRINGS; rave fork: BAYAN, GARMON, DUDA, KUGIKLY, SVIREL, TALYANKA */
     "",                          /* 1 DIGITAL (retired) */
     "LKPLUU",                    /* 2 PHASE: BRASS, ORGAN, STRING, RESO, BELL, WIRE */
     "LBLLL",                     /* 3 LOFI: PULSE LD, WAVE BASS, ARP 8BIT, WAVE LEAD, STEP LEAD */
     "KKLL",                      /* 4 SAMPLE: PIANO, (PIANO: the retired TRANH's alias), FLUTE, SAX */
-    "PLBFLP",                    /* 5 VOICE: CHOIR AAH, VOX LEAD, WOW BASS, WHISPER; rave fork: ZHALEIKA, KHOR */
+    "PLBFLPBL",                  /* 5 VOICE: CHOIR AAH, VOX LEAD, WOW BASS, WHISPER; rave fork: ZHALEIKA, KHOR, VARGAN, ROZHOK */
     "BLLUP",                     /* 6 TRIO: FAT BASS, ARP LEAD, SYNC LEAD, RING BELL, CHIP CHOIR */
     "KKKKK",                     /* 7 WHEEL: the organs */
     "PFPP",                      /* 8 GRAIN: CLOUD PAD, GLITCH, FROZEN, SHIMMER */
-    "UUUPUDDPUUULUU",            /* 9 PHYS: BELL TREE, MARIMBA, PLUCK, BOWED METAL, KALIMBA, HAND DRUM, TOMS, DRONE
-                                  * STRING, HARP; rave fork: BALALAIKA, DOMRA, GUSLI, KOLOKOL, ZVON */
+    "UUUPUDDPUUULUUBLL",         /* 9 PHYS: BELL TREE, MARIMBA, PLUCK, BOWED METAL, KALIMBA, HAND DRUM, TOMS, DRONE
+                                  * STRING, HARP; rave fork: BALALAIKA, DOMRA, GUSLI, KOLOKOL, ZVON, KONTRABAS, LIRA, GUDOK */
     "DDDDDD",                    /* 10 DRUM: DRUM KIT; 1.5.6: DEEP KIT, TIGHT KIT, PERC KIT; rave fork: RAVE KIT, FOLK KIT */
     "FFFF",                      /* 11 NOISE: WIND, RAIN, ARCADE, METAL */
     "KUBLPUKU",                  /* 12 FM6: TINE EP, BELL, FM BASS, BRASS, PAD, MARIMBA, ORGAN, PLUCK */

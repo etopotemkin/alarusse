@@ -5,12 +5,12 @@ A fork of Felucca for the M-VAVE FM-1 aimed at rave / hard-techno live sets. Ups
 **Added so far**
 - **RUMBLE kick** — DRUM > KICK has a third choice next to PUNCH and ROUND: the punchy kick followed by a low tail that swells in as the kick's body dies (sidechain built in), roughened by low noise, driven and low-passed. On the DRUM track: TONE = the tail's low-pass (60–300 Hz), DECY = its length, SNAP = its grit.
 - **RAVE KIT** preset (DRUM): STD kit with the RUMBLE kick.
-- **Russian folk instruments**: PHYS BALALAIKA (open strings ringing a fourth up; tremolo with RATCH), DOMRA, GUSLI, KOLOKOL (church bell), ZVON (small bells); ANALOG BAYAN, GARMON (the wide "razliv" detune); VOICE ZHALEIKA (hornpipe), KHOR (folk choir).
-- **FOLK kit** (DRUM > KIT FOLK, preset FOLK KIT): RUMBLE kick, BUBEN (tambourine), TRESHCHOTKA (rattle), LOZHKI (spoons, two pitches), BUBENTSY (sleigh bells), a frame drum, KOLOKOLCHIK (hand bell).
+- **Russian folk instruments**: PHYS BALALAIKA (open strings ringing a fourth up; tremolo with RATCH), DOMRA, GUSLI, KOLOKOL (church bell), ZVON (small bells); ANALOG BAYAN, GARMON (the wide "razliv" detune); VOICE ZHALEIKA (hornpipe), KHOR (folk choir); and KONTRABAS (contrabass balalaika), LIRA (hurdy-gurdy), GUDOK (bowed fiddle), DUDA (bagpipe), KUGIKLY (panpipes), SVIREL (whistle), TALYANKA (small accordion), VARGAN (jaw harp), ROZHOK (Vladimir horn).
+- **FOLK kit** (DRUM > KIT FOLK, preset FOLK KIT): RUMBLE kick, BUBEN (tambourine), TRESHCHOTKA (rattle), LOZHKI (spoons), BUBENTSY (sleigh bells), a frame drum, KOROBOCHKA (wood box), KOLOKOLCHIK (hand bell).
 - **Folk phrases** (SAVE > PHRASES): KOROBEIN, BARYNYA, OOMPAH (the bayan's left hand), FOLKBEAT (for the FOLK kit); the folk presets suggest them.
 - **Power-on band**: ANALOG BAYAN, PHYS BALALAIKA, VOICE ZHALEIKA, DRUM FOLK KIT (`FELUCCA_FOLK_DEF=0`: upstream's sounds; the host tests use those).
 - **FX layer: BUILD UP and DROP** on F5 / G5 (free upstream). BUILD UP: hold it for a two-bar riser (opening noise, the mix's high-pass rising), let go for the drop. DROP: every track muted while held, the reverb and delay ring on; let go and the band is back on the next beat.
-- **Folk UI themes** (MENU > COLOR): HOHLOMA (black lacquer, gold, cinnabar), GZHEL (porcelain and cobalt), PALEKH (black lacquer, ultramarine, gold), ZHOSTOV (Zhostovo: black, roses, leaves), GORODEC (Gorodets: ochre wood, madder red, cobalt), DYMKA (Dymkovo: white clay, crimson, green). The FOLK kit's lanes are named on the grid (BD BB TR LZ BC TM L2 ZV).
+- **Folk UI themes** (MENU > COLOR): HOHLOMA (black lacquer, gold, cinnabar), GZHEL (porcelain and cobalt), PALEKH (black lacquer, ultramarine, gold), ZHOSTOV (Zhostovo: black, roses, leaves), GORODEC (Gorodets: ochre wood, madder red, cobalt), DYMKA (Dymkovo: white clay, crimson, green). The FOLK kit's lanes are named on the grid (BD BB TR LZ BC TM KB ZV).
 - `tests/folk_demo.c`: an 8-bar folk-rave demo through the real engines.
 - Felucca-Engines is vendored in `firmware/engines/` (MIT) instead of a submodule, so the fork's presets build in CI.
 

@@ -220,6 +220,10 @@ static const preset_t FORMANT_PRESETS[] = {
      * choir on O, a little random per note */
     {"ZHALEIKA", {60, 0, 0, 3, 118, 18, 104, 6}, {4, 70, 112, 30}, 0, 1, FX(0, 0, 30, 34), PAT(14)},
     {"KHOR", {96, 0, 0, 0, 52, 26, 70, 30}, {80, 90, 118, 95}, 0, 0, FX(0, 60, 15, 85), PAT(5)},
+    /* VARGAN the jaw harp: a hard buzz whose mouth opens from A to I on every note (TALK), narrow formants: play one
+     * pitch in rhythm; ROZHOK the Vladimir horn: a buzzing reed through O, bright */
+    {"VARGAN", {0, 64, 36, 0, 127, 0, 120, 0}, {0, 70, 100, 20}, 0, 1, FX(10, 0, 20, 20), PAT(8)},
+    {"ROZHOK", {88, 0, 0, 2, 108, 14, 92, 4}, {8, 70, 112, 30}, 0, 1, FX(0, 0, 25, 35), PAT(14)},
 };
 
 static const engine_t ENG_FORMANT = {

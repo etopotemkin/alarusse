@@ -334,7 +334,7 @@ static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
     {   /* FOLK (rave fork): Russian folk percussion over the RUMBLE kick. KICK the RUMBLE kick (DV_DEF's design: this row's
          * pitch, gain); SNARE the BUBEN, a tambourine: a low skin under ringing jingles; CLAP the TRESHCHOTKA, a wooden
          * rattle: 7 dry clacks 30 ms apart; HAT CL the LOZHKI, spoons: a clack of two short partials; HAT OP the BUBENTSY,
-         * sleigh bells; TOM a low frame drum; RIM a second, higher pair of spoons; BELL the KOLOKOLCHIK, a hand bell */
+         * sleigh bells; TOM a low frame drum; RIM the KOROBOCHKA, a wooden box; BELL the KOLOKOLCHIK, a hand bell */
         {DVT_RUMBLE, 64, 502, 400, 2200, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
         /* skin 200 Hz (2nd x1.78), jingles: noise in a narrow band at 7 kHz, tau 50 ms */
         {DVT_SNARE, 40, 886, 500, 2880, {200, 0, 100, 10, 20000, 9000, 1806, 3413, 20, 20000, 32767, 12000, 1900}},
@@ -346,8 +346,9 @@ static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
         {DVT_HATO, 63, 1690, 400, 4040, {1700, 6000, 1700, 2042, 0, 29491, 4000, 20, 5, 0, 0, 0, 0}},
         /* 80's tom tuned down: a frame drum, 110 Hz, its stick */
         {DVT_TOM, 53, 720, 220, 4055, {12, 100, 1302, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-        /* higher spoons: 1.8 + 4.5 kHz, tau 2.5 ms */
-        {DVT_RIM, 32, 1475, 25, 4800, {200, 26000, 12000, 12000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* the KOROBOCHKA, a wooden box (a wood block): a hollow knock at 900 Hz with its 2.6 x partial, tau 12 ms, a
+         * little drive */
+        {DVT_RIM, 32, 1293, 120, 2400, {265, 28000, 9000, 6000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
         /* hand bell: squares 1.3 / 1.9 kHz into a band, a ringing tail 100 ms */
         {DVT_BELL, 50, 1408, 1000, 1070, {109, 130, 2000, 20000, 40, 3000, 0, 0, 0, 0, 0, 0, 0}},
     },

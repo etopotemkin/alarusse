@@ -121,7 +121,7 @@ static uint32_t drum_swaps(const track_t *t)
 static const char *drum_lane_name(const track_t *t, uint32_t l)
 {
     static const char *const N[NLANE] = {"KICK", "SNARE", "CLAP", "HATCL", "HATOP", "TOM", "RIM", "BELL"};
-    static const char *const F[NLANE] = {"KICK", "BUBEN", "TRESH", "LOZHK", "BUBNC", "TOM", "LOZH2", "ZVON"};
+    static const char *const F[NLANE] = {"KICK", "BUBEN", "TRESH", "LOZHK", "BUBNC", "TOM", "KOROB", "ZVON"};
     uint32_t kit = drum_swaps(t);
     if (drum_kit_plays(t->p[P_E0]) == DK_FOLK)          /* (rave fork) the folk kit's own names */
         return F[l & (NLANE - 1u)];
@@ -136,7 +136,7 @@ static const char *drum_lane_name(const track_t *t, uint32_t l)
 static const char *drum_lane_abbr(const track_t *t, uint32_t l)
 {
     static const char *const N[NLANE] = {"BD", "SD", "CP", "CH", "OH", "TM", "RS", "CB"};
-    static const char *const F[NLANE] = {"BD", "BB", "TR", "LZ", "BC", "TM", "L2", "ZV"};
+    static const char *const F[NLANE] = {"BD", "BB", "TR", "LZ", "BC", "TM", "KB", "ZV"};
     uint32_t kit = drum_swaps(t);
     if (drum_kit_plays(t->p[P_E0]) == DK_FOLK)
         return F[l & (NLANE - 1u)];

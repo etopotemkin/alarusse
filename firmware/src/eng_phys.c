@@ -242,6 +242,13 @@ static const preset_t PHYS_PRESETS[] = {
     {"GUSLI", {PM_SYMP, 52, 60, 104, 70, 127, 0, 40}, {0, 100, 127, 100}, 0, 0, FX(0, 20, 20, 62), PAT(3)},
     {"KOLOKOL", {PM_MODAL, 100, 76, 122, 30, 127, 0, 40}, {0, 100, 127, 110}, 0, 0, FX(0, 0, 20, 72), PAT(7)},
     {"ZVON", {PM_MODAL, 88, 112, 100, 8, 127, 0, 50}, {0, 100, 127, 90}, 0, 0, FX(0, 10, 30, 55), PAT(7)},
+    /* KONTRABAS: the contrabass balalaika, the folk band's bass: a low string ringing with its octaves, round, long; LIRA: the
+     * hurdy-gurdy, a bowed (BOW) string over drones on the scale's root and fifth (CHRD ROOT) with the trompette's buzz;
+     * GUDOK: the bowed fiddle over drones a fifth up (CHRD 5TH), a rough bow. All three on SYMP: the plain string
+     * (STRNG) speaks weakly low down and bowed */
+    {"KONTRABAS", {PM_SYMP, 8, 60, 100, 30, 127, 0, 50}, {0, 100, 127, 40}, 0, 1, FX(0, 0, 0, 12), PAT(16)},
+    {"LIRA", {PM_SYMP, 120, 60, 112, 60, 100, 50, 0}, {20, 100, 127, 60}, 0, 1, FX(0, 10, 15, 40), PAT(4)},
+    {"GUDOK", {PM_SYMP, 20, 70, 110, 50, 100, 60, 0}, {24, 100, 127, 50}, 0, 1, FX(0, 0, 15, 35), PAT(15)},
 };
 
 static const engine_t ENG_PHYS = {

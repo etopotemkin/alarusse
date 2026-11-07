@@ -216,6 +216,13 @@ static const preset_t ANALOG_PRESETS[] = {
      * Russian accordion, beating; both a short bellows attack */
     {"BAYAN", {4, 4, 64, 2, 74, 12, 14, 70}, {10, 80, 120, 34}, 6, 0, FX(0, 0, 10, 30), PAT(16)},
     {"GARMON", {4, 22, 64, 4, 80, 14, 24, 70}, {6, 80, 120, 30}, 6, 0, FX(0, 0, 10, 26), PAT(16)},
+    /* DUDA the bagpipe: a nasal chanter over its own drone an octave down (SUB), resonant; KUGIKLY the panpipes: a sine
+     * in breath noise; SVIREL the shepherd's whistle: a triangle, a little breath, bright; TALYANKA the small bright
+     * accordion: two square reeds wide apart, short */
+    {"DUDA", {6, 4, 88, 6, 76, 72, 40, 100}, {12, 80, 124, 30}, 0, 1, FX(0, 0, 10, 30), PAT(4)},
+    {"KUGIKLY", {3, 0, 64, 44, 84, 16, 0, 127}, {14, 80, 110, 40}, 0, 1, FX(0, 0, 20, 45), PAT(14)},
+    {"SVIREL", {2, 6, 64, 16, 102, 10, 6, 127}, {6, 80, 116, 26}, 0, 1, FX(0, 0, 25, 35), PAT(15)},
+    {"TALYANKA", {1, 30, 64, 2, 92, 10, 18, 80}, {2, 70, 110, 24}, 4, 0, FX(0, 0, 10, 22), PAT(16)},
 };
 
 static const engine_t ENG_ANALOG = {
