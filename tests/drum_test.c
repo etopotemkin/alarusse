@@ -42,7 +42,7 @@
 
 static int fails;
 static const char *const TN[DVT_COUNT] = {"KICK PUNCH", "KICK ROUND", "SNARE", "CLAP", "HAT CL", "HAT OP",
-                                          "TOM", "CONGA", "RIM", "CLAVE", "BELL", "CYM"};
+                                          "TOM", "CONGA", "RIM", "CLAVE", "BELL", "CYM", "KICK RUMBLE"};
 #define NMAX (FS * 12)
 
 /* ------------------------------------------------------------- render --- */
@@ -250,9 +250,10 @@ static const struct {
     {0.03, 5800, -20.8},                        /* CLAVE */
     {0.35, 1990, -20.0},                        /* BELL */
     {2.28, 6050, -23.5},                        /* CYM: the strike, then the ring (tau 0.95 s) */
+    {0.60, 1090, -11.7},                        /* KICK RUMBLE: the kick, then the tail (tau 160 ms) swelling in */
 };
 
-static uint32_t len_of(uint32_t t) { return t == DVT_CYM ? NMAX : FS * 2u; }
+static uint32_t len_of(uint32_t t) { return t == DVT_CYM ? NMAX : t == DVT_RUMBLE ? FS * 4u : FS * 2u; }
 static int pitched(uint32_t t) { return t != DVT_CLAP && t != DVT_HATC && t != DVT_HATO && t != DVT_CYM; }
 /* the designed frequency (BELL: its upper square, 1.48 f, the band-pass's partial) */
 static double design_hz(uint32_t t, int32_t tune)
@@ -265,7 +266,7 @@ static double design_hz(uint32_t t, int32_t tune)
  * CLAVE their first 30 ms, the snare's shell 40..200 ms (after its glide), the others 20..300 ms */
 static double pitch_of(const buf_t *b, uint32_t t, double f)
 {
-    if (t <= DVT_ROUND)
+    if (t <= DVT_ROUND || t == DVT_RUMBLE)
         return pitch(b, FS * 15u / 100u, FS * 40u / 100u, f / 1.4, f * 1.4);
     if (t == DVT_RIM || t == DVT_CLAVE)
         return pitch(b, 0, FS * 3u / 100u, f / 1.4, f * 1.4);
@@ -1211,6 +1212,40 @@ static void demo_seq(const char *dir, const char *name, const uint8_t (*ev)[3], 
     fclose(w);
 }
 
+/* rave fork: a four-on-the-floor techno bar x 4 (kick every beat, open hat on the off-beats, clap on 2 and 4, closed
+ * hats on the 16ths between), on the DRUM preset pre (RAVE KIT: the RUMBLE kick) */
+static const uint8_t TECHNO[][3] = {
+#define TB(b) {b, 36, 120}, {b + 1, 42, 60}, {b + 2, 46, 90}, {b + 3, 42, 70}, {b + 4, 36, 120}, {b + 4, 39, 100}, \
+    {b + 5, 42, 60}, {b + 6, 46, 90}, {b + 7, 42, 70}, {b + 8, 36, 120}, {b + 9, 42, 60}, {b + 10, 46, 90}, \
+    {b + 11, 42, 70}, {b + 12, 36, 120}, {b + 12, 39, 100}, {b + 13, 42, 60}, {b + 14, 46, 90}, {b + 15, 42, 70}
+    TB(0), TB(16), TB(32), TB(48)
+#undef TB
+};
+static void demo_preset(const char *dir, const char *name, const uint8_t (*ev)[3], uint32_t nev, uint32_t steps,
+                        uint32_t pre)
+{
+    uint32_t f, frames = steps * (FS / 8u) + FS, e = 0, off = 0, sixteenth = FS / 8u;
+    FILE *w = wav_open(dir, name, frames);
+    if (!w)
+        return;
+    host_tracks_init();
+    host_preset(&trk[0], ENGI_DRUM, pre);
+    for (f = 0; f < frames; f += CTL) {
+        int32_t o[2 * CTL];
+        uint32_t k;
+        while (off < e && (ev[off][0] + 1u) * sixteenth <= f)
+            trk_note_off(&trk[0], ev[off++][1]);
+        while (e < nev && ev[e][0] * sixteenth <= f) {
+            trk_note_on(&trk[0], ev[e][1], ev[e][2]);
+            e++;
+        }
+        mix_block(o, CTL);
+        for (k = 0; k < CTL; k++)
+            wav_put(w, o[2 * k], o[2 * k + 1]);
+    }
+    fclose(w);
+}
+
 /* the engine playing ev with KICK / KIT for frames samples: a hash of the mix, and its peak. In a child process: every
  * render starts from the same state (the effects' tails, the noise) */
 static uint64_t seq_hash(const uint8_t (*ev)[3], uint32_t nev, uint32_t frames, int16_t kick, int16_t kit, int32_t *peak)
@@ -1360,6 +1395,8 @@ static void demos(const char *dir)
     demo_seq(dir, "kit_keys", (const uint8_t(*)[3])kit, 16, 64, 0, DK_STD);
     demo_seq(dir, "beat_punch", BEAT, sizeof BEAT / sizeof BEAT[0], 64, 0, DK_STD);
     demo_seq(dir, "beat_round", BEAT, sizeof BEAT / sizeof BEAT[0], 64, 1, DK_STD);
+    demo_seq(dir, "techno_punch", TECHNO, sizeof TECHNO / sizeof TECHNO[0], 64, 0, DK_STD);
+    demo_preset(dir, "techno_rave_kit", TECHNO, sizeof TECHNO / sizeof TECHNO[0], 64, 4);
     for (k = 0; k < DV_NKIT; k++) {
         char name[32];
         snprintf(name, sizeof name, "beat_kit_%s", KITN[k]);

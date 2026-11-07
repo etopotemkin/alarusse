@@ -1,0 +1,54 @@
+name: Build FM-1 firmware
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04   # x86-64: JieLi toolchain runs natively, no Docker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Python deps
+        run: pip install Pillow fonttools
+
+      - name: Cache JieLi toolchain + AC79 SDK
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.jieli
+            ~/fw-AC79_AIoT_SDK
+          key: jieli-ac79-v1.2.1
+
+      - name: Get JieLi toolchain
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: sh tools/get_toolchain.sh
+
+      - name: Get AC79 SDK (3 files used by the packager)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth 1 --branch AC79NN_SDK_V1.2.1_2023-12-13 \
+            https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK.git ~/fw-AC79_AIoT_SDK
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Host tests
+        continue-on-error: true
+        run: sh tests/run_tests.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fm1-firmware-${{ github.sha }}
+          path: |
+            build/*.fwsc
+            build/*.bin

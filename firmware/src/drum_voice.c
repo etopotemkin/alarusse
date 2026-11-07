@@ -72,7 +72,7 @@
 enum { DV_KICK, DV_SNARE, DV_CLAP, DV_HATC, DV_HATO, DV_TOM, DV_RIM, DV_BELL, DV_NLANE };
 enum {
     DVT_PUNCH, DVT_ROUND, DVT_SNARE, DVT_CLAP, DVT_HATC, DVT_HATO, DVT_TOM, DVT_CONGA, DVT_RIM, DVT_CLAVE,
-    DVT_BELL, DVT_CYM, DVT_COUNT
+    DVT_BELL, DVT_CYM, DVT_RUMBLE, DVT_COUNT       /* RUMBLE (rave fork): KICK's third kick, appended */
 };
 /* a lane of a model kit as a type: the kit (1..DV_NKIT) in the high 4 bits, the lane in the low 3 (Felucca's own
  * types: 0 above). Its run (the DVT_* it plays through) is the kit's (DV_KIT) */
@@ -137,6 +137,7 @@ static const struct {
     {1585, 1382, 1715, 30, 32, {64, 64, 64}, 5608},      /* CLAVE  2.5 kHz (1.2..4), tau 3..12 ms */
     {1161, 969, 1353, 300, 59, {64, 64, 64}, 2785},      /* BELL   540 Hz (270..1080), tail tau 30..400 ms */
     {1078, 886, 1270, 3000, 53, {64, 64, 64}, 7583},     /* CYM    metal 400 Hz, ring tau 0.3..3 s */
+    {502, 403, 664, 400, 64, {64, 64, 48}, 3000},        /* RUMBLE 50 Hz, the rumble's tau 40 .. 640 ms */
 };
 #define DV_SEED 0x5EED1234
 #define DV_P16(hz_p16) pitch_inc(clamp((hz_p16), 0, 2047))
@@ -421,6 +422,33 @@ static void dv_setup_own(dv_coef_t *c, const dv_param_t *p)
         g = 4096 + (int32_t)x * 3 * 4096 / 127;          /* DRIVE: x1 .. x4 into the soft clip, Q12 */
         c->g[3] = g;
         c->g[4] = (int32_t)((19661u << 15) / (uint32_t)softclip((19661 * g) >> 12));   /* level kept */
+        break;
+    }
+    case DVT_RUMBLE: {
+        /* the techno rumble: PUNCH's kick at its design sweep, then a low tail that swells in as the kick's body
+         * dies (ducked by it: the sidechain, built in), a sine at the kick's pitch roughened by low noise, driven
+         * and low-passed. TONE: the tail's low-pass (60 .. 300 Hz), DECAY: its length, extra (SNAP): its grit */
+        int32_t b = 64 * 576 / 127, g;
+        c->span[1] = DV_P16(p16 + b) - c->inc[0];
+        c->span[0] = DV_P16(p16 + 384 + b) - DV_P16(p16 + b);
+        c->k[0] = dv_k(1500);
+        c->k[1] = dv_k(24000);
+        c->kb[0] = dv_kb(70000);                         /* the kick's body: 70 ms, whatever DECAY says */
+        c->kb[1] = dv_kb(tau);                           /* the rumble */
+        c->hold = 17;
+        c->g[0] = 2300;
+        c->g[1] = 1300;
+        c->inc[1] = DV_P16(1636);
+        c->inc[2] = c->inc[1] >> 1;
+        c->click = (uint16_t)(0xFFFFFFFFu / c->inc[2]);
+        c->g[2] = 9000 + acc * 24;
+        g = 4096 + 3 * 4096 / 2;                         /* the kick's own drive: x2.5 */
+        c->g[3] = g;
+        c->g[4] = (int32_t)((19661u << 15) / (uint32_t)softclip((19661 * g) >> 12));
+        tsvf_coef_k(&c->f[0], dv_cut(554 + (int32_t)tn * 446 / 127), 5800);   /* 60 .. 300 Hz, Q 0.7 */
+        c->hp = dv_pole(805);                            /* the noise: below 150 Hz */
+        c->f[1].a1 = 4096 + (int32_t)x * 7 * 4096 / 127; /* GRIT: x1 .. x8 into a soft clip (Q12) */
+        c->g[5] = 20000;                                 /* the rumble's level against the kick */
         break;
     }
     case DVT_SNARE:
@@ -725,6 +753,51 @@ static __attribute__((noinline)) void dv_kick_run(const dv_coef_t *c, dv_voice_t
     v->live = v->q[0] > DV_QUIET;
 }
 
+/* RUMBLE: the kick (dv_kick_run's loop, at PUNCH's numbers) + the tail. State past the kick's: q[1] the tail's
+ * envelope, s[1] the noise's low-pass, s[2] a DC blocker (~27 Hz, Q8), s[3] s[4] the tail's SVF */
+static __attribute__((noinline)) void dv_rumble_run(const dv_coef_t *c, dv_voice_t *v, int32_t *y, uint32_t n)
+{
+    uint32_t i, ph = v->ph[0], cph = v->ph[1], wph = v->ph[2], p1 = v->e[0], p2 = v->e[1], cn = v->n;
+    uint32_t k2 = v->cnt ? 32768u : c->k[1], s1 = c->span[0] >> 16, s2 = c->span[1] >> 16;
+    int32_t a, d, ra, rd, n1 = v->s[1], dcq = v->s[2], grit = c->f[1].a1;
+    dv_slow(&v->q[0], v->cnt ? 65536u : c->kb[0], &a, &d);
+    dv_slow(&v->q[1], c->kb[1], &ra, &rd);
+    if (v->cnt)
+        v->cnt--;
+    for (i = 0; i < n; i++) {
+        int32_t b, x, nz = DV_NOISE(v), r, ka, duck;
+        ph += c->inc[0] + s1 * p1 + s2 * p2;
+        p1 = (p1 * c->k[0]) >> 15;
+        p2 = (p2 * k2) >> 15;
+        b = sine_i(ph) + ((sine_i(ph << 1) * c->g[0]) >> 15) + ((sine_i(ph * 3u) * c->g[1]) >> 15);
+        a += d;
+        ra += rd;
+        ka = a >> 5;                                     /* the kick's body, Q15 */
+        x = (b * ka) >> 15;
+        if (cn) {
+            int32_t w = (32768 - sine_i(wph + 0x40000000u)) >> 1;
+            x += (((sine_i(cph) * w) >> 15) * c->g[2]) >> 15;
+            cph += c->inc[1];
+            wph += c->inc[2];
+            cn--;
+        }
+        /* the tail: a sine at the kick's resting pitch, its phase and level shaken by low noise */
+        n1 += ((nz - n1) * c->hp) >> 15;
+        r = sine_i(ph + (uint32_t)(n1 << 15)) + n1 * 2;   /* the kick's own phase: one pitch, no beating */
+        r = softclip((r * grit) >> 12);
+        r = tsvf_lp(&c->f[0], r, &v->s[3], &v->s[4]);
+        dcq += (r * 256 - dcq) >> 8;
+        r -= dcq >> 8;
+        duck = 32767 - (ka > 32767 ? 32767 : ka);
+        r = (((r * (ra >> 5)) >> 15) * duck) >> 15;
+        x += (r * c->g[5]) >> 15;
+        y[i] = (softclip((x * c->g[3]) >> 12) * c->g[4]) >> 15;
+    }
+    v->ph[0] = ph, v->ph[1] = cph, v->ph[2] = wph, v->e[0] = p1, v->e[1] = p2, v->n = (uint16_t)cn;
+    v->s[1] = n1, v->s[2] = dcq;
+    v->live = v->q[0] > DV_QUIET || v->q[1] > DV_QUIET;
+}
+
 static __attribute__((noinline)) void dv_snare_run(const dv_coef_t *c, dv_voice_t *v, int32_t *y, uint32_t n)
 {
     uint32_t i, p0 = v->ph[0], p1 = v->ph[1], eg = v->e[0], es = v->e[1], ek = v->e[2], gs = c->span[0] >> 16;
@@ -917,6 +990,11 @@ static void dv_strike(const dv_coef_t *c, dv_voice_t *v)
         v->n = c->click;
         v->e[2] = c->k[2] ? 65536u : 0;                  /* the rise, if any */
         break;
+    case DVT_RUMBLE:
+        v->cnt = c->hold;
+        v->n = c->click;
+        v->q[1] = 1 << 30;
+        break;
     case DVT_CLAP:
         v->q[0] = 0;
         v->cnt = (uint16_t)(c->click - 1u);              /* teeth after the first */
@@ -962,6 +1040,9 @@ static void dv_run(const dv_coef_t *c, dv_voice_t *v, const int32_t *metal, int3
     case DVT_PUNCH:
     case DVT_ROUND:
         dv_kick_run(c, v, y, n);
+        break;
+    case DVT_RUMBLE:
+        dv_rumble_run(c, v, y, n);
         break;
     case DVT_SNARE:
         dv_snare_run(c, v, y, n);

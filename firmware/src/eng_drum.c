@@ -48,7 +48,7 @@ static uint32_t drum_kit_plays(int32_t v) { return DK_PLAYS[clamp(v, 0, DK_COUNT
  * 4 BELL -> CYM */
 static const uint8_t DK_SWAP[DV_NKIT] = {0, 4, 1, 0, 2 | 4, 4, 0, 1 | 2};
 static const uint8_t DV_TYPE_LANE[DVT_COUNT] = {
-    DV_KICK, DV_KICK, DV_SNARE, DV_CLAP, DV_HATC, DV_HATO, DV_TOM, DV_TOM, DV_RIM, DV_RIM, DV_BELL, DV_BELL,
+    DV_KICK, DV_KICK, DV_SNARE, DV_CLAP, DV_HATC, DV_HATO, DV_TOM, DV_TOM, DV_RIM, DV_RIM, DV_BELL, DV_BELL, DV_KICK,
 };
 
 typedef struct {
@@ -71,7 +71,7 @@ static uint8_t drum_mute[NPART];
 
 /* 1..3 named as the kit they play: aliases, never shown or offered (EDITOR_PROTOCOL.md: retired values) */
 static const char *const N_DRUM_KIT[] = {"STD", "66", "10", "77", "80", "10", "66", "55", "77", "DEEP", "TIGHT", "PERC"};
-static const char *const N_DRUM_KICK[] = {"PUNCH", "ROUND"};
+static const char *const N_DRUM_KICK[] = {"PUNCH", "ROUND", "RUMBLE"};
 
 /* General MIDI notes 35..81 -> the drum (DVT_*; DVT_PUNCH: the kick KICK picks) and semitones from its
  * designed pitch */
@@ -94,7 +94,7 @@ static uint32_t drum_gm(const int16_t *p, uint32_t note, int32_t *st)
     *st = DRUM_GM[n - 35u][1];
     if (kit >= DK_80)
         return DV_KTYPE(kit - DK_80 + 1u, DV_TYPE_LANE[t]);
-    return t == DVT_PUNCH && p[P_E6] > 0 ? DVT_ROUND : t;
+    return t == DVT_PUNCH && p[P_E6] > 0 ? (p[P_E6] > 1 ? DVT_RUMBLE : DVT_ROUND) : t;
 }
 
 /* ----------------------------------------------------- the grid's lanes --- */
@@ -322,6 +322,8 @@ static const preset_t DRUM_PRESETS[] = {
     {"DEEP KIT", {DK_DEEP, 64, 64, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 28), PAT(12)},
     {"TIGHT KIT", {DK_TIGHT, 64, 64, 56, 64, 100, 0, 16}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 8), PAT(12)},
     {"PERC KIT", {DK_PERC, 64, 64, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 24), PAT(12)},
+    /* rave fork: STD with the RUMBLE kick (TONE: the tail's low-pass, DECY: its length, SNAP: its grit) */
+    {"RAVE KIT", {DK_STD, 64, 48, 80, 72, 110, 2, 24}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 12), PAT(12)},
 };
 
 static const engine_t ENG_DRUM = {
@@ -334,7 +336,7 @@ static const engine_t ENG_DRUM = {
         {"DECY", F_PCT, 0, 127, 64, 0, 0},
         {"SNAP", F_PCT, 0, 127, 64, 0, 0},
         {"ACC", F_PCT, 0, 127, 100, 0, 0},
-        {"KICK", F_ENUM, 0, 1, 0, N_DRUM_KICK, 0},
+        {"KICK", F_ENUM, 0, 2, 0, N_DRUM_KICK, 0},
         {"DRV", F_PCT, 0, 127, 0, 0, 0},
     },
     .presets = DRUM_PRESETS,

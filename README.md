@@ -1,3 +1,17 @@
+# Felucca RAVE (fork)
+
+A fork of Felucca for the M-VAVE FM-1 aimed at rave / hard-techno live sets. Upstream: [hugelton/Felucca](https://github.com/hugelton/Felucca). Not affiliated with M-VAVE or Hügelton.
+
+**Added so far**
+- **RUMBLE kick** — DRUM > KICK has a third choice next to PUNCH and ROUND: the punchy kick followed by a low tail that swells in as the kick's body dies (sidechain built in), roughened by low noise, driven and low-passed. On the DRUM track: TONE = the tail's low-pass (60–300 Hz), DECY = its length, SNAP = its grit.
+- **RAVE KIT** preset (DRUM): STD kit with the RUMBLE kick.
+
+**Planned**: acid line and rave stabs, performance buttons (build / riser, stutter, master filter sweep, drop), show sync over USB MIDI (Resolume, lighting).
+
+Builds run on GitHub Actions (`.github/workflows/build-fwsc.yml`): the installable `.fwsc` is attached to each run as an artifact.
+
+---
+
 # Felucca
 
 [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](LICENSE)
