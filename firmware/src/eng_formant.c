@@ -216,6 +216,10 @@ static const preset_t FORMANT_PRESETS[] = {
     {"VOX LEAD", {32, 0, 0, 2, 90, 8, 72, 0}, {6, 70, 105, 55}, 0, 1, FX(0, 20, 45, 40), PAT(4)},
     {"WOW BASS", {95, 0, 68, 0, 100, 0, 80, 0}, {0, 70, 70, 30}, 0, 1, FX(10, 0, 10, 10), PAT(8)},
     {"WHISPER", {0, 95, 88, 3, 50, 120, 50, 0}, {50, 90, 110, 90}, 0, 0, FX(0, 40, 30, 70), PAT(5)},
+    /* rave fork: ZHALEIKA the hornpipe's nasal reed (a bright buzz into narrow formants near I), mono; KHOR a folk
+     * choir on O, a little random per note */
+    {"ZHALEIKA", {60, 0, 0, 3, 118, 18, 104, 6}, {4, 70, 112, 30}, 0, 1, FX(0, 0, 30, 34), PAT(4)},
+    {"KHOR", {96, 0, 0, 0, 52, 26, 70, 30}, {80, 90, 118, 95}, 0, 0, FX(0, 60, 15, 85), PAT(5)},
 };
 
 static const engine_t ENG_FORMANT = {

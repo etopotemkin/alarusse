@@ -76,7 +76,7 @@ enum {
 };
 /* a lane of a model kit as a type: the kit (1..DV_NKIT) in the high 4 bits, the lane in the low 3 (Felucca's own
  * types: 0 above). Its run (the DVT_* it plays through) is the kit's (DV_KIT) */
-#define DV_NKIT 8                                        /* (1.5.6, #216: DEEP TIGHT PERC after 77) */
+#define DV_NKIT 9                                        /* (1.5.6, #216: DEEP TIGHT PERC after 77; rave fork: FOLK) */
 #define DV_KITOF(t) ((uint32_t)(t) >> 4)
 #define DV_KTYPE(kit, lane) ((uint8_t)(((kit) << 4) | (lane)))
 
@@ -188,7 +188,7 @@ typedef struct {
     int16_t v[13];
 } dv_kit_t;
 /* the accent per kit: + (x / 16384) per accent step (75: +4 dB at full, as Felucca's own) */
-static const uint8_t DV_KIT_ACC[DV_NKIT] = {120, 45, 100, 40, 40, 80, 60, 70};
+static const uint8_t DV_KIT_ACC[DV_NKIT] = {120, 45, 100, 40, 40, 80, 60, 70, 80};
 static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
     {   /* 80 */
         /* deep sine, a small drop, long decay */
@@ -330,6 +330,26 @@ static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
         {DVT_CLAVE, 32, 1568, 149, 2131, {84, 28000, 10000, 6348, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
         /* 66's bell: sines 830 / 613 Hz */
         {DVT_RIM, 40, 1280, 60, 3629, {-84, 30000, 7500, 4096, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    },
+    {   /* FOLK (rave fork): Russian folk percussion over the RUMBLE kick. KICK the RUMBLE kick (DV_DEF's design: this row's
+         * pitch, gain); SNARE the BUBEN, a tambourine: a low skin under ringing jingles; CLAP the TRESHCHOTKA, a wooden
+         * rattle: 7 dry clacks 30 ms apart; HAT CL the LOZHKI, spoons: a clack of two short partials; HAT OP the BUBENTSY,
+         * sleigh bells; TOM a low frame drum; RIM a second, higher pair of spoons; BELL the KOLOKOLCHIK, a hand bell */
+        {DVT_RUMBLE, 64, 502, 400, 2200, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* skin 200 Hz (2nd x1.78), jingles: noise in a narrow band at 7 kHz, tau 50 ms */
+        {DVT_SNARE, 40, 886, 500, 2880, {200, 0, 100, 10, 20000, 9000, 1806, 3413, 20, 20000, 32767, 12000, 1900}},
+        /* wood at 2 kHz, 7 clacks 30 ms apart (tau 6 ms), almost no tail */
+        {DVT_CLAP, 48, 1523, 80, 3600, {0, 2048, 1700, 0, 1200, 32000, 60, 1323, 7, 0, 0, 0, 0}},
+        /* spoons: 1.2 + 3.7 kHz into a soft clip, tau 3 ms */
+        {DVT_RIM, 32, 1382, 30, 2460, {260, 26000, 14000, 12000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* sleigh bells: 77's pulse cluster into a band at 5.3 kHz, a 2 ms rise (the shake), tau 0.15 s */
+        {DVT_HATO, 63, 1690, 400, 4040, {1700, 6000, 1700, 2042, 0, 29491, 4000, 20, 5, 0, 0, 0, 0}},
+        /* 80's tom tuned down: a frame drum, 110 Hz, its stick */
+        {DVT_TOM, 53, 720, 220, 4055, {12, 100, 1302, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* higher spoons: 1.8 + 4.5 kHz, tau 2.5 ms */
+        {DVT_RIM, 32, 1475, 25, 4800, {200, 26000, 12000, 12000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* hand bell: squares 1.3 / 1.9 kHz into a band, a ringing tail 100 ms */
+        {DVT_BELL, 50, 1408, 1000, 1070, {109, 130, 2000, 20000, 40, 3000, 0, 0, 0, 0, 0, 0, 0}},
     },
 };
 
@@ -554,6 +574,15 @@ static void dv_setup_kit(dv_coef_t *c, const dv_param_t *p)
     const int16_t *v = K->v;
     int32_t p16, dp, acc = p->accent;
     uint32_t tau;
+    if (K->run == DVT_RUMBLE) {                          /* (rave fork) RUMBLE: Felucca's own, at this row's pitch and gain */
+        dv_param_t q = *p;
+        q.type = DVT_RUMBLE;
+        q.tune = (int16_t)(p->tune + K->p16 - DV_DEF[DVT_RUMBLE].p16);
+        dv_setup_own(c, &q);
+        c->out = (int32_t)(K->gain * (uint32_t)p->level / 127u);
+        c->out += (c->out * acc * DV_KIT_ACC[kit]) >> 14;
+        return;
+    }
     p16 = clamp(K->p16 + p->tune, K->p16 - 192, K->p16 + 192);
     dp = p16 - K->p16;
     tau = dv_tau_of(K->tau0, K->oct16, d);

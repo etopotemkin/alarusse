@@ -233,6 +233,15 @@ static const preset_t PHYS_PRESETS[] = {
     /* SYMP: {MODEL, CHRD, BRIT, DAMP, SYMP, ACC, BUZZ, EXC} */
     {"DRONE STRING", {PM_SYMP, 127, 80, 88, 64, 100, 92, 0}, {0, 100, 127, 90}, 0, 0, FX(0, 10, 20, 50), PAT(3)},
     {"HARP", {PM_SYMP, 8, 62, 74, 60, 90, 0, 0}, {0, 100, 127, 80}, 0, 0, FX(0, 20, 20, 60), PAT(3)},
+    /* rave fork: Russian folk instruments. BALALAIKA: a bright, short string whose open strings ring along a fourth
+     * above (CHRD 4TH, the prima's E-E-A), a hard pick; DOMRA: a stiffer single string, a plectrum, rounder; GUSLI:
+     * a harp of strings ringing in a major chord, long; KOLOKOL: a big church bell, inharmonic and long; ZVON: small
+     * bells, bright (the zvonnitsa's trezvon). Tremolo, the balalaika's own way of holding a note: the step's RATCH */
+    {"BALALAIKA", {PM_SYMP, 40, 104, 60, 44, 112, 12, 44}, {0, 100, 127, 36}, 0, 0, FX(0, 0, 10, 22), PAT(3)},
+    {"DOMRA", {PM_STRING, 34, 96, 116, 26, 127, 0, 34}, {0, 100, 127, 46}, 0, 0, FX(0, 10, 15, 28), PAT(4)},
+    {"GUSLI", {PM_SYMP, 52, 60, 104, 70, 127, 0, 40}, {0, 100, 127, 100}, 0, 0, FX(0, 20, 20, 62), PAT(3)},
+    {"KOLOKOL", {PM_MODAL, 100, 76, 122, 30, 127, 0, 40}, {0, 100, 127, 110}, 0, 0, FX(0, 0, 20, 72), PAT(7)},
+    {"ZVON", {PM_MODAL, 88, 112, 100, 8, 127, 0, 50}, {0, 100, 127, 90}, 0, 0, FX(0, 10, 30, 55), PAT(7)},
 };
 
 static const engine_t ENG_PHYS = {
