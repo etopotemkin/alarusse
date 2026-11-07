@@ -42,13 +42,13 @@ jobs:
       - name: Build
         run: ./build.sh
 
-      - name: Host tests
-        continue-on-error: true
-        run: sh tests/run_tests.sh
-
       - uses: actions/upload-artifact@v4
         with:
           name: fm1-firmware-${{ github.sha }}
           path: |
             build/*.fwsc
             build/*.bin
+
+      - name: Host tests
+        continue-on-error: true
+        run: sh tests/run_tests.sh
