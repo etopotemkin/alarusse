@@ -218,7 +218,7 @@ static const preset_t FORMANT_PRESETS[] = {
     {"WHISPER", {0, 95, 88, 3, 50, 120, 50, 0}, {50, 90, 110, 90}, 0, 0, FX(0, 40, 30, 70), PAT(5)},
     /* rave fork: ZHALEIKA the hornpipe's nasal reed (a bright buzz into narrow formants near I), mono; KHOR a folk
      * choir on O, a little random per note */
-    {"ZHALEIKA", {60, 0, 0, 3, 118, 18, 104, 6}, {4, 70, 112, 30}, 0, 1, FX(0, 0, 30, 34), PAT(4)},
+    {"ZHALEIKA", {60, 0, 0, 3, 118, 18, 104, 6}, {4, 70, 112, 30}, 0, 1, FX(0, 0, 30, 34), PAT(14)},
     {"KHOR", {96, 0, 0, 0, 52, 26, 70, 30}, {80, 90, 118, 95}, 0, 0, FX(0, 60, 15, 85), PAT(5)},
 };
 

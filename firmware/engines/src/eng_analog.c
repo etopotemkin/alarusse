@@ -214,8 +214,8 @@ static const preset_t ANALOG_PRESETS[] = {
     {"STRINGS", {0, 25, 64, 0, 70, 10, 0, 32}, {70, 90, 115, 90}, 5, 0, FX(0, 60, 20, 70), PAT(5)},
     /* (Felucca RAVE fork) free reeds: BAYAN two reeds nearly in tune, dry; GARMON the wide "razliv" detune of the
      * Russian accordion, beating; both a short bellows attack */
-    {"BAYAN", {4, 4, 64, 2, 74, 12, 14, 70}, {10, 80, 120, 34}, 6, 0, FX(0, 0, 10, 30), PAT(6)},
-    {"GARMON", {4, 22, 64, 4, 80, 14, 24, 70}, {6, 80, 120, 30}, 6, 0, FX(0, 0, 10, 26), PAT(6)},
+    {"BAYAN", {4, 4, 64, 2, 74, 12, 14, 70}, {10, 80, 120, 34}, 6, 0, FX(0, 0, 10, 30), PAT(16)},
+    {"GARMON", {4, 22, 64, 4, 80, 14, 24, 70}, {6, 80, 120, 30}, 6, 0, FX(0, 0, 10, 26), PAT(16)},
 };
 
 static const engine_t ENG_ANALOG = {

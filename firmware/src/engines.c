@@ -195,11 +195,31 @@ static const struct {
      * now that the arpeggiator is the track's and a preset no longer switches it on */
     {"ARP", {48, 51, 55, 60, 63, 67, 72, 75, 48, 51, 55, 60, 63, 67, 72, 75},       /* 13 */
      {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0}},
+    /* rave fork: folk phrases (traditional tunes, A minor). KOROBEIN the first line of Korobeiniki; BARYNYA a
+     * stamping dance figure; OOMPAH the bayan's left hand: bass on the beat, the chord's note between (Am, E); FOLKBEAT
+     * for the FOLK kit: the kick on every beat, spoons, sleigh bells on the off-beats, the rattle at the ends */
+    {"KOROBEIN", {76, 0, 71, 72, 74, 0, 72, 71, 69, 0, 69, 72, 76, 0, 74, 72},     /* 14 */
+     {1, T_, 0, 0, 1, T_, 0, 0, 1, T_, 0, 0, 1, T_, 0, 0}},
+    {"BARYNYA", {69, 69, 0, 69, 71, 72, 74, 0, 76, 74, 72, 71, 69, 0, 64, 0},      /* 15 */
+     {1, 0, 0, 0, 1, 0, 1, T_, 1, 0, 0, 0, 1, T_, 1, T_}},
+    {"OOMPAH", {45, 0, 60, 0, 40, 0, 59, 0, 45, 0, 60, 0, 40, 0, 56, 0},           /* 16 */
+     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}},
+    {"FOLKBEAT", {36, 42, 46, 42, 36, 42, 46, 39, 36, 42, 46, 42, 36, 37, 46, 39},  /* 17 drums */
+     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1}},
 };
 #undef T_
 #define NPATTERNS (sizeof PATTERNS / sizeof PATTERNS[0])
 
 /* the parts at power-on (engine, preset, PATTERNS[n - 1] in the sequencer, 0 = empty: all are): bass, pad, lead, drums */
-static const uint8_t TRK_DEF[NPART][3] = {{0, 4, 0}, {ENGI_FM6, 4, 0}, {3, 0, 0}, {ENGI_DRUM, 0, 0}}; /* ANALOG ACID,
-                                                                       * FM6 PAD (was DIGITAL PAD), LOFI PULSE LD, DRUM KIT */
+/* rave fork: the folk band at power-on (FELUCCA_FOLK_DEF, 1 by default): ANALOG BAYAN, PHYS BALALAIKA, VOICE ZHALEIKA,
+ * DRUM FOLK KIT. 0: upstream's ANALOG ACID, FM6 PAD, LOFI PULSE LD, DRUM KIT (the host tests are written against those:
+ * tests/run_tests.sh builds them with 0) */
+#ifndef FELUCCA_FOLK_DEF
+#define FELUCCA_FOLK_DEF 1
+#endif
+#if FELUCCA_FOLK_DEF
+static const uint8_t TRK_DEF[NPART][3] = {{0, 12, 0}, {ENGI_PHYS, 9, 0}, {5, 4, 0}, {ENGI_DRUM, 5, 0}};
+#else
+static const uint8_t TRK_DEF[NPART][3] = {{0, 4, 0}, {ENGI_FM6, 4, 0}, {3, 0, 0}, {ENGI_DRUM, 0, 0}};
+#endif
 static uint32_t trk_def_engine(uint32_t i) { return TRK_DEF[i % NPART][0]; }

@@ -331,7 +331,7 @@ static const preset_t DRUM_PRESETS[] = {
     /* rave fork: STD with the RUMBLE kick (TONE: the tail's low-pass, DECY: its length, SNAP: its grit) */
     {"RAVE KIT", {DK_STD, 64, 48, 80, 72, 110, 2, 24}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 12), PAT(12)},
     /* rave fork: the FOLK kit (spoons, rattle, tambourine, sleigh bells, a hand bell over the RUMBLE kick) */
-    {"FOLK KIT", {DK_FOLK, 64, 48, 72, 64, 100, 2, 16}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 18), PAT(12)},
+    {"FOLK KIT", {DK_FOLK, 64, 48, 72, 64, 100, 2, 16}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 18), PAT(17)},
 };
 
 static const engine_t ENG_DRUM = {

@@ -201,7 +201,7 @@ OUT=build/host
 mkdir -p "$OUT"
 # the hardware layer: firmware/hal, then felucca-bsp (firmware/bsp: chip/, boards/fm1/), as tools/build.py
 HALI="-Ifirmware/hal -Ifirmware/bsp/chip -Ifirmware/bsp/boards/fm1 -Ifirmware/src"   # (src: uac_fir.h, which bsp/chip/usb.c includes)
-CC="${CC:-cc} -O1 -Wall -Wno-unused-function $HALI"
+CC="${CC:-cc} -O1 -Wall -Wno-unused-function -DFELUCCA_FOLK_DEF=0 $HALI"   # (rave fork: upstream power-on sounds)
 fail=0
 run() { echo "== $1"; shift; "$@" || fail=1; }
 

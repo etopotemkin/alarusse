@@ -7,6 +7,8 @@ A fork of Felucca for the M-VAVE FM-1 aimed at rave / hard-techno live sets. Ups
 - **RAVE KIT** preset (DRUM): STD kit with the RUMBLE kick.
 - **Russian folk instruments**: PHYS BALALAIKA (open strings ringing a fourth up; tremolo with RATCH), DOMRA, GUSLI, KOLOKOL (church bell), ZVON (small bells); ANALOG BAYAN, GARMON (the wide "razliv" detune); VOICE ZHALEIKA (hornpipe), KHOR (folk choir).
 - **FOLK kit** (DRUM > KIT FOLK, preset FOLK KIT): RUMBLE kick, BUBEN (tambourine), TRESHCHOTKA (rattle), LOZHKI (spoons, two pitches), BUBENTSY (sleigh bells), a frame drum, KOLOKOLCHIK (hand bell).
+- **Folk phrases** (SAVE > PHRASES): KOROBEIN, BARYNYA, OOMPAH (the bayan's left hand), FOLKBEAT (for the FOLK kit); the folk presets suggest them.
+- **Power-on band**: ANALOG BAYAN, PHYS BALALAIKA, VOICE ZHALEIKA, DRUM FOLK KIT (`FELUCCA_FOLK_DEF=0`: upstream's sounds; the host tests use those).
 - `tests/folk_demo.c`: an 8-bar folk-rave demo through the real engines.
 - Felucca-Engines is vendored in `firmware/engines/` (MIT) instead of a submodule, so the fork's presets build in CI.
 
