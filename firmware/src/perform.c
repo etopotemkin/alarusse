@@ -47,6 +47,7 @@
  * PF_M1), then the mutes of the black keys */
 enum { PF_R8, PF_R16, PF_R32, PF_REV, PF_LPF, PF_HPF, PF_TAPE, PF_FRZ, PF_OUP, PF_ODN, PF_FLG, PF_PHS,
        PF_RTHR, PF_ETHR,                      /* 1.5.1: REV THROW, ECHO THROW */
+       PF_BLD, PF_DRP,                        /* rave fork: BUILD, DROP */
        PF_M1, PF_N = PF_M1 + NTRK };
 #define PF_NFX PF_M1                          /* the effects a white key can hold */
 #define PF_KEYS 16u                           /* the white keys F3 .. G5 */
@@ -79,10 +80,17 @@ enum { BM_NONE, BM_LOOP, BM_TAPE, BM_FRZ, BM_HARM };
 
 /* the white keys' effects by default (1.1.5's ten, then FLANGER and PHASER, 1.5.1's REV THROW and ECHO THROW on D5
  * and E5; PF_N: none) */
+/* rave fork: BUILD and DROP on the last two (F5 G5), free upstream.
+ * BUILD: while held, a riser over two bars: noise through a low-pass opening from ~150 Hz to ~12 kHz, its level rising
+ * (the square of the time held), and the mix's high-pass rising with it (to the HPF key's end over the two bars). Let
+ * go: both gone at once (the riser in 2.9 ms, the high-pass in ~45 ms): the drop lands on the release.
+ * DROP: while held, every track muted as by its black key (before the buses: what the reverb and delay hold rings on);
+ * let go, the tracks come back on the next beat (at once while stopped), so a release a little early still lands on
+ * the one */
 static const uint8_t PF_DEF[PF_KEYS] = {PF_R8, PF_R16, PF_R32, PF_REV, PF_LPF, PF_HPF, PF_TAPE, PF_FRZ, PF_OUP, PF_ODN,
-                                        PF_FLG, PF_PHS, PF_RTHR, PF_ETHR, PF_N, PF_N};
+                                        PF_FLG, PF_PHS, PF_RTHR, PF_ETHR, PF_BLD, PF_DRP};
 static volatile uint8_t perf_map[PF_KEYS] = {PF_R8, PF_R16, PF_R32, PF_REV, PF_LPF, PF_HPF, PF_TAPE, PF_FRZ, PF_OUP,
-                                             PF_ODN, PF_FLG, PF_PHS, PF_RTHR, PF_ETHR, PF_N, PF_N};
+                                             PF_ODN, PF_FLG, PF_PHS, PF_RTHR, PF_ETHR, PF_BLD, PF_DRP};
                                       /* main: white key p's effect (PF_N none), from the settings (ui_layer.c) */
 static volatile uint8_t perf_remap;   /* main: perf_map changed (seq.c: a key held takes its new effect) */
 
@@ -142,11 +150,18 @@ static struct {
     int32_t rw, ew, rw1, ew1;          /* REV / ECHO THROW: their shares (Q15) at this block's start and end */
     uint8_t thr;                       /* .. either at work this block (mix_part: perf_throw) */
     int32_t mg[NTRK];                  /* mute gains, Q15 (32768 = open) */
+    /* BUILD, DROP (rave fork) */
+    uint32_t bt;                       /* samples BUILD has been held */
+    int32_t bw, bk;                    /* the riser's level now (Q15) and its low-pass index (Q8, PF_SVF) */
+    int32_t bz[2];                     /* .. its filter's state */
+    int16_t bc[3];                     /* .. its coefficients this block */
+    int32_t brng;                      /* .. its noise */
+    uint8_t dr;                        /* DROP: the tracks held muted (held, or let go and waiting for the beat) */
     /* FLANGER, PHASER */
     int32_t fw, pw;                    /* their shares, Q15 */
     uint32_t fwp, fn;                  /* FLANGER: the frame written next; frames written since it started */
     int32_t px[2][PH_ST], py[2][PH_ST], pfb[2];   /* PHASER: each stage's last input and output, L and R; the fed back */
-} pf = {.src = PF_N, .next = PF_N, .lc = PF_TOP, .mg = {32768, 32768, 32768, 32768}};
+} pf = {.src = PF_N, .next = PF_N, .lc = PF_TOP, .mg = {32768, 32768, 32768, 32768}, .brng = 0x2545F491};
 
 static int16_t fl_buf[FL_LEN][2];      /* FLANGER's line: L R, at half the level (headroom) */
 
@@ -301,7 +316,7 @@ static __attribute__((noinline)) int perf_begin(uint32_t n)
     uint32_t held = perf_kill ? 0u : (perf_held | perf_latched | (perf_solo ? (~(uint32_t)perf_solo & 15u) << PF_M1 : 0u)) & perf_avail();
     uint32_t q, k, ph0, bnd;
     int32_t m;
-    if (!held && !pf.busy && !(perf_k[0] | perf_k[1] | perf_k[2])) {   /* idle: the clock only */
+    if (!held && !pf.busy && !pf.dr && !(perf_k[0] | perf_k[1] | perf_k[2])) {   /* idle: the clock only */
         pf.ph += n;
         pf.sync = 0;
         perf_act = 0;
@@ -342,6 +357,19 @@ static __attribute__((noinline)) int perf_begin(uint32_t n)
             t = pf.ht < bar ? pf.ht : bar;
             ht = (int32_t)((uint32_t)(PF_TOP - PF_LOW) / 64u * (t * 64u / bar));
         }
+        pf.bt = (pf.act & PF_BIT(PF_BLD)) ? pf.bt + n : 0u;   /* BUILD: the high-pass over two bars, the riser */
+        if (pf.bt) {
+            uint32_t q;
+            t = pf.bt < 2u * bar ? pf.bt : 2u * bar;
+            q = t * 64u / (2u * bar);                   /* 0..64 */
+            if ((int32_t)((uint32_t)(PF_TOP - PF_LOW) / 64u * q) > ht)
+                ht = (int32_t)((uint32_t)(PF_TOP - PF_LOW) / 64u * q);
+            pf.bk = (int32_t)(9u << 8) + (int32_t)(q * ((51u << 8) / 64u));   /* index 9 (150 Hz) .. 60 (12 kHz) */
+            for (k = 0; k < 3u; k++) {
+                int32_t i = pf.bk >> 8, f = pf.bk & 255;
+                pf.bc[k] = (int16_t)(PF_SVF[i][k] + (((PF_SVF[i < 63 ? i + 1 : 63][k] - PF_SVF[i][k]) * f) >> 8));
+            }
+        }
         if (m > 0 && m * (PF_TOP - PF_LOW) / 100 > ht)
             ht = m * (PF_TOP - PF_LOW) / 100;
         pf.lc += clamp(lt - pf.lc, -192, 192);      /* ~45 ms over the range */
@@ -359,6 +387,18 @@ static __attribute__((noinline)) int perf_begin(uint32_t n)
         pf.rw1 += clamp((pf.act & PF_BIT(PF_RTHR) ? 32768 : 0) - pf.rw1, -s, s);
         pf.ew1 += clamp((pf.act & PF_BIT(PF_ETHR) ? 32768 : 0) - pf.ew1, -s, s);
         pf.thr = (pf.rw | pf.rw1 | pf.ew | pf.ew1) != 0;
+    }
+    {   /* DROP: held, the tracks muted; let go, back on the next beat (the 1/16 clock's quarter; stopped: at once) */
+        uint32_t qb = 4u * pf.P, pos = (pf.ph - n) % qb;
+        if (pf.act & PF_BIT(PF_DRP))
+            pf.dr = 1;
+        else if (pf.dr && (!song.playing || pos == 0u || qb - pos <= n))
+            pf.dr = 0;
+        if (pf.dr) {
+            pf.act |= PF_MUTE;
+            held |= PF_MUTE;
+            perf_act = pf.act;
+        }
     }
     pf.mute = 0;
     for (k = 0; k < NTRK; k++)
@@ -769,7 +809,7 @@ static __attribute__((noinline)) void perf_block(int32_t *bl, int32_t *br, uint3
         } else {
             pf.lz[0] = pf.lz[1] = pf.lz[2] = pf.lz[3] = 0;
         }
-        ht = (a & PF_BIT(PF_HPF)) || perf_k[0] > 0 || pf.hc > 0 ? 32768 : 0;
+        ht = (a & (PF_BIT(PF_HPF) | PF_BIT(PF_BLD))) || perf_k[0] > 0 || pf.hc > 0 ? 32768 : 0;
         pf.ha += clamp(ht - pf.ha, -SL_SLOPE, SL_SLOPE);
         if (pf.ha) {
             int32_t fl = pf_svf(clamp(l >> 2, -32767, 32767), &pf.hz[0], pf.hk, 1) << 2;
@@ -791,6 +831,17 @@ static __attribute__((noinline)) void perf_block(int32_t *bl, int32_t *br, uint3
                 r = pf_mix(r, pf.chr, pf.cw);
             }
         }
+        if (pf.bt || pf.bw) {                        /* BUILD's riser: low-passed noise, louder as it opens */
+            uint32_t q = pf.bt ? (pf.bt < 32u * pf.P ? pf.bt : 32u * pf.P) / (pf.P >> 4 ? pf.P >> 4 : 1u) : 0u;   /* 0..512 */
+            int32_t tg = pf.bt ? (int32_t)((q * q) >> 3) : 0, x;   /* 0..32768: the square of the time held */
+            pf.bw += clamp(tg - pf.bw, -SL_SLOPE, SL_SLOPE);
+            x = pf_svf((int32_t)noise32(&pf.brng) >> 19, pf.bz, pf.bc, 0);   /* white Q15 >> 2 */
+            x = mulq15(x, pf.bw) << 3;                  /* (the low-pass takes most of it while it is low) */
+            l += x;
+            r += x;
+            if (!pf.bw)
+                pf.bz[0] = pf.bz[1] = 0;
+        }
         bl[i] = l;
         br[i] = r;
     }
@@ -799,5 +850,5 @@ static __attribute__((noinline)) void perf_block(int32_t *bl, int32_t *br, uint3
     if ((pf.act & PF_BIT(PF_PHS)) || pf.pw)
         perf_phaser(bl, br, n);
     pf.busy = pf.act || pf.mode != BM_NONE || pf.w || pf.la || pf.ha || pf.cw || pf.td || pf.mute || pf.fw || pf.pw || pf.thr ||
-              pf.fn || perf_k[0] || perf_k[1] || perf_k[2];
+              pf.fn || pf.bw || pf.dr || perf_k[0] || perf_k[1] || perf_k[2];
 }

@@ -55,6 +55,10 @@ PALETTES = [
     # 1.0.2: black and white (the derived tokens are set, not blended: bw()); the old MONO is GREY (id 0)
     # 1.8: its primary and secondary GREY's red and blue (were white)
     ("MONO",   (0, 0, 0),       (255, 255, 255), (255, 255, 255), RED,       (72, 140, 255)),
+    # rave fork: Russian folk crafts. HOHLOMA (Khokhloma lacquer ware): black lacquer, gold, cream, the cinnabar as
+    # the one active thing; GZHEL (Gzhel porcelain): white porcelain, cobalt, deep ink, a gilded rim for the active
+    ("HOHLOMA", (14, 6, 4),     (236, 178, 52),  (250, 236, 212), RED,       (255, 110, 40)),
+    ("GZHEL",   (246, 248, 252), (22, 62, 170),  (14, 22, 54),    RED_LIGHT, (140, 82, 0)),
 ]
 BW = "MONO"
 BW_GREY = (82, 82, 82)             # MONO's one mid grey (RGB565 10/20/10): DIM LINE RAISE LANE

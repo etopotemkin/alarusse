@@ -9,10 +9,12 @@ A fork of Felucca for the M-VAVE FM-1 aimed at rave / hard-techno live sets. Ups
 - **FOLK kit** (DRUM > KIT FOLK, preset FOLK KIT): RUMBLE kick, BUBEN (tambourine), TRESHCHOTKA (rattle), LOZHKI (spoons, two pitches), BUBENTSY (sleigh bells), a frame drum, KOLOKOLCHIK (hand bell).
 - **Folk phrases** (SAVE > PHRASES): KOROBEIN, BARYNYA, OOMPAH (the bayan's left hand), FOLKBEAT (for the FOLK kit); the folk presets suggest them.
 - **Power-on band**: ANALOG BAYAN, PHYS BALALAIKA, VOICE ZHALEIKA, DRUM FOLK KIT (`FELUCCA_FOLK_DEF=0`: upstream's sounds; the host tests use those).
+- **FX layer: BUILD UP and DROP** on F5 / G5 (free upstream). BUILD UP: hold it for a two-bar riser (opening noise, the mix's high-pass rising), let go for the drop. DROP: every track muted while held, the reverb and delay ring on; let go and the band is back on the next beat.
+- **UI themes HOHLOMA and GZHEL** (MENU > COLOR): Khokhloma's black lacquer, gold and cinnabar; Gzhel's white porcelain and cobalt. The FOLK kit's lanes are named on the grid (BD BB TR LZ BC TM L2 ZV).
 - `tests/folk_demo.c`: an 8-bar folk-rave demo through the real engines.
 - Felucca-Engines is vendored in `firmware/engines/` (MIT) instead of a submodule, so the fork's presets build in CI.
 
-**Planned**: acid line and rave stabs, performance buttons (build / riser, stutter, master filter sweep, drop), show sync over USB MIDI (Resolume, lighting).
+**Planned**: show sync over USB MIDI (Resolume, lighting).
 
 Builds run on GitHub Actions (`.github/workflows/build-fwsc.yml`): the installable `.fwsc` is attached to each run as an artifact.
 

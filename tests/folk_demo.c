@@ -4,7 +4,9 @@
  *           sleigh bells on the off-beats, a hand bell at the turn
  *   part 1  PHYS BALALAIKA: the tune (Korobeiniki, traditional) in tremolo, re-plucked every 1/32
  *   part 2  ANALOG BAYAN: off-beat chords
- *   part 3  VOICE ZHALEIKA: the tune an octave up, bars 5..8
+ *   part 3  VOICE ZHALEIKA: the tune an octave up, from bar 7
+ * The FX layer as played live: BUILD held over bars 5..6 (the riser, the high-pass), let go on bar 7 (the drop); DROP
+ * held from the middle of bar 10's third beat, let go a little early: the band comes back on bar 11's one.
  *   build/host/folk_demo OUT.wav */
 #define main hostsim_main
 #include "hostsim.c"
@@ -12,7 +14,7 @@
 
 #define BPM 130u
 #define S16 (FS * 60u / BPM / 4u)          /* a 16th, samples */
-#define BARS 8u
+#define BARS 12u
 
 /* the tune: (16th step, note, length in 16ths) over 4 bars, repeated */
 static const uint8_t TUNE[][3] = {
@@ -42,6 +44,9 @@ int main(int argc, char **argv)
     trk[2].p[P_LEVEL] = 70;
     trk[3].p[P_LEVEL] = 80;
     song.master_q12 = 4096;
+    song.g[G_BPM] = BPM;
+    song.playing = 1;                                    /* (the FX layer's beat: DROP comes back on it) */
+    perf_start();
     w = fopen(out, "wb");
     if (!w)
         return 1;
@@ -50,6 +55,16 @@ int main(int argc, char **argv)
         int32_t o[2 * CTL];
         uint32_t s = f / S16, ph = f % S16, step = s % 64u, bar = s / 16u;
         int on16 = ph < CTL, on32 = (f % (S16 / 2u)) < CTL;
+        if (on16) {                                      /* the FX layer */
+            if (s == 4u * 16u)
+                perf_press(PF_BLD, 1);
+            if (s == 6u * 16u)
+                perf_press(PF_BLD, 0);
+            if (s == 9u * 16u + 10u)
+                perf_press(PF_DRP, 1);
+            if (s == 9u * 16u + 15u)
+                perf_press(PF_DRP, 0);                    /* a 16th early: lands on bar 11's one */
+        }
         if (bar < BARS) {
             if (on16) {                                  /* drums */
                 uint32_t b = step % 16u;
@@ -84,12 +99,12 @@ int main(int argc, char **argv)
                 if (step >= a && step < e) {
                     if (on32)                             /* balalaika tremolo: re-pluck every 1/32 */
                         note(1, TUNE[k][1] - 12u, step == a && ph < CTL ? 110 : 80);
-                    if (bar >= 4u && step == a && on16)
+                    if (bar >= 6u && step == a && on16)
                         note(3, TUNE[k][1], 100);
                 }
                 if (step == e % 64u && on16) {
                     off(1, TUNE[k][1] - 12u);
-                    if (bar >= 4u || (bar == 4u && e == 64u))
+                    if (bar >= 6u)
                         off(3, TUNE[k][1]);
                 }
             }
