@@ -59,6 +59,13 @@ PALETTES = [
     # the one active thing; GZHEL (Gzhel porcelain): white porcelain, cobalt, deep ink, a gilded rim for the active
     ("HOHLOMA", (14, 6, 4),     (236, 178, 52),  (250, 236, 212), RED,       (255, 110, 40)),
     ("GZHEL",   (246, 248, 252), (22, 62, 170),  (14, 22, 54),    RED_LIGHT, (140, 82, 0)),
+    # PALEKH (Palekh lacquer miniatures): black lacquer, ultramarine, cream, gold for the active; ZHOSTOVO (Zhostovo
+    # trays, ZHOSTOV): black, the roses, a leaf green; GORODEC (Gorodets painting): light ochre wood, a deep madder red, cobalt;
+    # DYMKA (Dymkovo clay toys): white clay, crimson, a grass green
+    ("PALEKH",   (10, 8, 16),     (110, 146, 255), (246, 236, 214), RED,       (240, 190, 70)),
+    ("ZHOSTOV",  (8, 8, 8),       (250, 128, 140), (246, 240, 236), RED,       (110, 210, 120)),
+    ("GORODEC",  (244, 224, 176), (130, 26, 20),   (36, 20, 10),    RED_LIGHT, (16, 60, 150)),
+    ("DYMKA",    (250, 250, 246), (176, 24, 84),   (22, 20, 30),    RED_LIGHT, (0, 110, 56)),
 ]
 BW = "MONO"
 BW_GREY = (82, 82, 82)             # MONO's one mid grey (RGB565 10/20/10): DIM LINE RAISE LANE

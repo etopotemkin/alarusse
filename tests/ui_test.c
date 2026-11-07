@@ -1617,6 +1617,7 @@ static int test_display_preferences(void)
                  str_eq(UI_PALETTES[UI_BW_INDEX].name, "MONO") && T_BG == 0u && T_TEXT == 0xFFFFu &&
                  (turn(EN_K1, 1), settings.palette == 10u) && str_eq(UI_PALETTES[10].name, "HOHLOMA") &&   /* rave fork */
                  (turn(EN_K1, 1), settings.palette == 11u) && str_eq(UI_PALETTES[11].name, "GZHEL") &&
+                 (turn(EN_K1, 1), turn(EN_K1, 1), turn(EN_K1, 1), turn(EN_K1, 1), settings.palette == 15u) && str_eq(UI_PALETTES[15].name, "DYMKA") &&
                  (turn(EN_K1, 1), settings.palette == UI_GREY_INDEX) && str_eq(UI_PALETTES[UI_GREY_INDEX].name, "GREY"));
     settings.lowcut = 2;
     ui.menu_sel = MI_LOWCUT;
